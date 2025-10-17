@@ -1,6 +1,7 @@
 /*
  * date-struct.c
  * Created on: Fri 17 Oct 2025
+ * Last Updated: Fri 17 Oct 2025
  * gopeterjun@naver.com
  * C for Everyone: Structured Programming
  * Module 1 Assignment
@@ -15,6 +16,10 @@
  * Then print out the date January 1 and print the next day Jan 2. Do this
  * for the following dates: February 28, March 14, October 31, and December
  * 31.
+ *
+ * Notes: I also added some 'assert()' statements that use helper function
+ * 'are_dates_equal(date d1, date d2)' to check the date struct return
+ * values from 'nextday(date ..)'
 */
 
 #include <stdio.h>
