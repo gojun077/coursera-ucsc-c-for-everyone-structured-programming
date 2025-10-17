@@ -4,7 +4,7 @@
  * Last Updated: Fri 17 Oct 2025
  * gopeterjun@naver.com
  * C for Everyone: Structured Programming
- * Module 1 Assignment
+ * Module 2 Assignment - Option 1
  *
  * Write enumerated types that supports dates—such as december 12. Then add
  * a function that produces a next day. So nextday(date) of december 12 is
