@@ -1,0 +1,61 @@
+#+TITLE: C for Everyone - Structured Programming
+#+SUBTITLE: Coursera / UC San Diego 2nd intro to C course 
+#+AUTHOR: Peter Jun Koh
+#+EMAIL: gopeterjun@naver.com
+#+DESCRIPTION: homework and notes for online course
+#+KEYWORDS: C, ADT, struct, type
+#+LANGUAGE: en
+
+* Summary
+
+- Created on: [2025-10-17 Fri]
+- Last Updated: [2025-10-17 Fri 11:48]
+
+This repo contains my notes and homework for the UC San Diego course, [[https://www.coursera.org/learn/c-structured-programming/home/welcome][C for
+Everyone: Structured Programming]], the 2nd course in the introductory /C for
+Everyone/ lecture series. The course is taught by Prof. Ira Pohl who also
+wrote *C by Dissection* (Kelley & Pohl, 2000 4ed) and *A Book on C* (Kelley
+& Pohl, 1995 3ed).
+
+*Syllabus*
+
+- Module 1: Enums, C pre-processor, assert
+  - Enums as an ADT (Abstract Data Type)
+  - The C pre-processor
+  - User =assert= for program correctness
+  - Module 1 Quiz (multiple choice)
+- Module 2: Struct, ADT stack
+  - Introduction to =struct=
+  - How to access struct members
+    - dot notation
+    - struct pointer dereference operator =->=
+  - Introduction to the ADT stack
+  - Use a stack to reverse a string
+  - Module 2 Quiz (multiple choice)
+  - Module 2 Assignment (Peer graded)
+    - using =struct=
+  - Module 2 Honors Assignment (Peer graded)
+- Module 3: List ADT and Binary Tree ADT
+  - Intro to the ADT list
+  - List of one element
+  - Full list
+  - Details of list processing
+  - Intro to Binary Trees
+  - More advanced I/O for =printf=
+  - Module 3 Honors Assignment
+- Module 4: File I/O and Command Line arguments
+  - Intro to File I/O
+  - Basic File I/O
+  - Double-spacing a file
+  - use of =main(argc, argv)=
+  - Module 4 Quiz (multiple choice)
+  - Module 4 Assignment: Arrays (Peer graded)
+  - Module 4 Honors Assignment (Peer graded)
+- Module 5: Intro to C++
+  - Intro to C++
+  - Example C++ program
+  - C++ Features that are easy
+  - C++ program using new feature
+  - C++ ADT as a =class=
+  - Module 5 Quiz (multiple choice)
+- Module 6: Final Exam (multiple choice)
