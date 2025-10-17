@@ -83,7 +83,7 @@ int main(void) {  // main takes no arguments
 
     // assert statements
     assert(are_dates_equal(nextday(date0), (date){ january, 2 }));
-    assert(are_dates_equal(nextday(date1), (date){ march, 2 }));
+    assert(are_dates_equal(nextday(date1), (date){ march, 1 }));
     assert(are_dates_equal(nextday(date2), (date){ march, 15 }));
     assert(are_dates_equal(nextday(date3), (date){ november, 1 }));
     assert(are_dates_equal(nextday(date4), (date){ january, 1 }));
@@ -92,7 +92,7 @@ int main(void) {  // main takes no arguments
     printf("The day after date0 is: ");
     printdate(next_date0);  // expected: 'January 2'
     printf("The day after date1 is: ");
-    printdate(next_date1);  // expected: 'March 2'
+    printdate(next_date1);  // expected: 'March 1'
     printf("The day after date2 is: ");
     printdate(next_date2);  // expected: 'March 15'
     printf("The day after date3 is: ");
