@@ -1,0 +1,10 @@
+# ignore 'bin/' subfolders
+bin/
+  # ignore LaTeX image subfolder
+ltximg
+# ignore LaTeX missing fonts
+missfont.log
+# ignore output binaries
+*.o
+# ignore output binaries
+*.out

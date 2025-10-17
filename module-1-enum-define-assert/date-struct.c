@@ -87,3 +87,71 @@ int main(void) {  // main takes no arguments
 
     return 0;
 }
+
+date nextday(date dt) {
+    // create new 'date' struct to store results of nextday()
+    date next_dt;
+
+    // --- How to access struct members ---
+    // Because 'dt' is a regular variable (not a pointer), we use the
+    // dot (.) operator.
+    // If 'dt' were a pointer (date *dt), we would use the arrow (->)
+    // operator, like so: next_dt.m = dt -> m;
+
+    // First, copy the current date into our new date variable.
+    next_dt.m = dt.m;
+    next_dt.d = dt.d;
+
+    // Now, let's figure out the number of days in the current month.
+    // Note: This simple version does not account for leap years.
+    int days_in_month;
+    switch (dt.m) {
+        case january:
+        case march:
+        case may:
+        case july:
+        case august:
+        case october:
+        case december:
+            days_in_month = 31;
+            break;
+        case april:
+        case june:
+        case september:
+        case november:
+            days_in_month = 30;
+            break;
+        case february:
+            days_in_month = 28; // Ignoring leap years for simplicity
+            break;
+    }
+
+    // Now we can calculate the next day.
+    if (dt.d < days_in_month) {
+        // It's not the end of the month, so just increment the day.
+        next_dt.d = dt.d + 1;
+    } else {
+        // It's the end of the month, so reset the day to 1.
+        next_dt.d = 1;
+        // And increment the month:
+        next_dt.m = (month)(dt.m + 1) % 12;
+    }
+
+    return next_dt;
+}
+
+/*
+ * @brief Prints a date struct in a readable format.
+ * @param dt The date to print.
+*/
+void printdate(date dt) {
+    // Array of month names for easy printing
+    const char *month_names[] = {
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    };
+
+    // We use the dot (.) operator here as because 'dt' is a struct
+    // variable.
+    printf("%s %d\n", month_names[dt.m], dt.d);
+}
