@@ -26,6 +26,7 @@
 */
 
 #include <stdio.h>
+#define DECK 52  // 52 cards in a deck of cards for blackjack/poker
 
 enum hand_name {
     royal_flush,
@@ -43,12 +44,31 @@ enum hand_name {
 typedef enum hand_name hand;
 
 enum suit {
-    club = 'c',
-    diamond = 'd',
-    heart = 'h',
-    spade = 's'
+    club,
+    diamond,
+    heart,
+    spade,
+    SUIT_COUNT
 };
 typedef enum suit suit;
+
+enum card_name {
+    ace = 1,
+    two = 2,
+    three = 3,
+    four = 4,
+    five = 5,
+    six = 6,
+    seven = 7,
+    eight = 8,
+    nine = 9,
+    ten = 10,
+    jack = 11,
+    queen = 12,
+    king = 13,
+    NAME_COUNT
+};
+typedef enum card_name cname;
 
 // stats for a single hand
 typedef struct hand_stats {
@@ -58,10 +78,10 @@ typedef struct hand_stats {
 } stats;
 
 // 'card' struct containing attributes 'suit' and 'pip'
-struct card {
+typedef struct card {
     short pips;
     suit c_suit;
-};
+} card;
 
 int main(void) {
     // array of 'stats' structs
@@ -78,6 +98,34 @@ int main(void) {
         [one_pair]        = {one_pair, 58627800, 0.43822546},
         [ace_high_orless] = {ace_high_orless, 23294460, 0.17411920}
     };
+
+    // initialize array of struct 'card'
+    card deck_of_cards[DECK];
+
+    int i = 0;  // index for 'deck_of_cards[DECK]'
+
+    // Outer loop: iterate through all suits from club: 0 to spade: 3
+    for (suit s = club; s < SUIT_COUNT; s++) {
+        // Inner loop: iterate through all pipes from ace: 1 to king: 13
+        for (cname p = ace; p < NAME_COUNT; p++) {
+            // assign current suit and pip value to current card
+            deck_of_cards[i].c_suit = s;
+            deck_of_cards[i].pips = p;
+            i++;
+        }
+    }
+
+    const char *suit_names[] = {"Clubs", "Diamonds", "Hearts", "Spades"};
+    const char *pip_names[] = {
+        "Invalid", "Ace", "Two", "Three", "Four", "Five", "Six", "Seven",
+        "Eight", "Nine", "Ten", "Jack", "Queen", "King"
+    };
+    printf("--- Initialized Deck of Cards ---\n");
+    for (i = 0; i < DECK; i++) {
+        printf("Card %2d: %-5s of %s\n", i,
+               pip_names[deck_of_cards[i].pips],
+               suit_names[deck_of_cards[i].c_suit]);
+    }
 
     printf("--- Four of a Kind ---\n");
     printf("Combinations: %d\t",
