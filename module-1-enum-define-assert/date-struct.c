@@ -18,6 +18,7 @@
 */
 
 #include <stdio.h>
+#include <assert.h>
 
 enum month {
     january,
@@ -41,8 +42,10 @@ typedef struct date {
     short d;
 } date;
 
+// function signatures (stubs)
 date nextday(date dt);
 void printdate(date dt);
+int are_dates_equal(date d1, date d2);
 
 int main(void) {  // main takes no arguments
     date date0 = { january, 1};
@@ -72,6 +75,9 @@ int main(void) {  // main takes no arguments
     date next_date2 = nextday(date2);
     date next_date3 = nextday(date3);
     date next_date4 = nextday(date4);
+
+    // assert statements
+    assert(are_dates_equal(nextday(date0), (date){ january, 2 }));
 
     printf("======================\n");
     printf("The day after date0 is: ");
@@ -154,4 +160,23 @@ void printdate(date dt) {
     // We use the dot (.) operator here as because 'dt' is a struct
     // variable.
     printf("%s %d\n", month_names[dt.m], dt.d);
+}
+
+/*
+ * @brief Compares two date structs for equality.
+ * @param d1 The first date.
+ * @param d2 The second date.
+ * @return 1 (true) if the dates are the same, 0 (false) otherwise.
+ *
+ * Note: you cannot use 'assert()' directly with structs; i.e. the
+ * following WON'T WORK:
+ *
+ * assert(nextday(date0) == (date){ january, 2 });
+ * compiler error:
+ * "invalid operands to binary == (have ‘date’ and ‘date’)"
+ * assert only evaluates '0' (false) and '1' true
+ */
+int are_dates_equal(date d1, date d2) {
+    // To be equal, both the day and the month must match.
+    return (d1.d == d2.d) && (d1.m == d2.m);
 }
