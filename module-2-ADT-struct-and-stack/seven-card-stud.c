@@ -14,9 +14,16 @@
  *
  * Write a function that randomly shuffles the deck.
  *
- * Deal out 7-card hands and evaluate the probability that a hand has no
- * pair, one pair, two pair, three of a kind, full house (3 of a kind + 1
- * pair) and 4 of a kind.
+ * Deal out 7-card hands and evaluate the probability that a hand has:
+ * - no pair (all 7 cards have different pips)
+ * - one pair (2 of 7 cards have the same pip)
+ * - two pair (2 cards have pip 'a', 2 cards have pip 'b'
+ * - three of a kind (3 cards have the same pip)
+ * - full house
+ *   + 'three of a kind' and 'one pair'
+ *   + 'three of a kind' and 2nd 'three of a kind'
+ *   + 'three of a kind' and 'two pair'
+ * - four of a kind (4 cards have the same pip)
  *
  * This is a Monte Carlo method to get an approximation to these
  * probabilities.  Use at least 1 million randomly generated hands.
@@ -42,6 +49,13 @@ enum hand_name {
     HAND_COUNT
 };
 typedef enum hand_name hand;
+
+// stats for a single hand
+typedef struct hand_stats {
+    hand name;
+    int combinations;
+    double probability;
+} stats;
 
 enum suit {
     club,
@@ -69,13 +83,6 @@ enum card_name {
     NAME_COUNT
 };
 typedef enum card_name cname;
-
-// stats for a single hand
-typedef struct hand_stats {
-    hand name;
-    int combinations;
-    double probability;
-} stats;
 
 // 'card' struct containing attributes 'suit' and 'pip'
 typedef struct card {
@@ -136,3 +143,38 @@ int main(void) {
 
     return 0;
 }
+
+// TODO 0: add deck shuffling function
+
+// TODO 1: Move deck initialization and population to separate function
+
+/* TODO 2: implement 7-card poker hand analysis (pips only)
+ * I first thought about sorting the pip values using 'qsort()'
+ * from <stdlib.h>, but this operation is O(n log n) time complexity.
+ * For small arrays of just 7 values, this will happen almost
+ * instantaneously.
+ *
+ * But a better approach would be to use a 'frequency array', aka
+ * HISTOGRAM, and just count the pip occurrences in a single pass. This has
+ * time complexity O(n). For 7 values, you won't really be able to tell a
+ * difference between O(n) and O(n log n), but the HISTOGRAM approach is
+ * better because it can be implemented with less code. First create your
+ * histogram:
+ *
+ * // indices 1 to 13 will store pip counts for Ace:1 to King: 13
+ * int pip_counts[14] = {0};  // initialize empty array
+ *
+ * Now assuming your 7 card pips are [5, 10, 5, 13, 10, 5, 2]
+ *
+ * // 'deck_of_cards' is an array of struct card from main() above
+ * for (int i = 0; i < 7; i++) {
+ *     pip_counts[deck_of_cards[i].pips]++;
+ * }
+ *
+ * After this loop, your pips_count array will look like:
+ * [0, 0, 1, 0, 0, 3, 0, 0, 0, 0, 2, 0, 0, 1]
+ *
+ * pip_counts[2] = 1, pip_counts[5] = 3, pip_counts[10] = 2,
+ * pip_counts[13] = 1
+ * Now all you have to do is iterate from 1 to 13 and check the counts
+*/
