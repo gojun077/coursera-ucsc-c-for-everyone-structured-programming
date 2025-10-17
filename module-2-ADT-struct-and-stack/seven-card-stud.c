@@ -66,7 +66,7 @@ struct card {
 int main(void) {
     // array of 'stats' structs
     stats scs_poker_hands[HAND_COUNT] = {
-        // designated initializer 
+        // designated initializer syntax
         [royal_flush] = {royal_flush, 4324, 0.00003232},
         [straight_flush] = {straight_flush, 37260, 0.00027851},
         [four_ofa_kind]   = {four_ofa_kind, 224848, 0.00168067},
@@ -79,10 +79,11 @@ int main(void) {
         [ace_high_orless] = {ace_high_orless, 23294460, 0.17411920}
     };
 
-    printf("--- Four of a Kind ---");
-    printf("Combinations: %d\n",
+    printf("--- Four of a Kind ---\n");
+    printf("Combinations: %d\t",
            scs_poker_hands[four_ofa_kind].combinations);
-    printf("Probability: %f\n",
+    // specify 8 decimal places of precision (default is 6)
+    printf("Probability: %.08f\n",
            scs_poker_hands[four_ofa_kind].probability);
 
     return 0;
