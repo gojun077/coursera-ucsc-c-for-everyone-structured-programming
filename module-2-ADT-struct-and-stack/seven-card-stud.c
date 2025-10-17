@@ -144,9 +144,12 @@ int main(void) {
     return 0;
 }
 
-// TODO 0: add deck shuffling function
+// TODO 0: add deck shuffling function: swap indices within the array of
+// 'struct card' at random maybe 10 times? Then 7 cards will be dealt from
+// the 'top of the deck' starting from 'deck_of_cards[0]'.
 
 // TODO 1: Move deck initialization and population to separate function
+// return 'array of struct card'
 
 /* TODO 2: implement 7-card poker hand analysis (pips only)
  * I first thought about sorting the pip values using 'qsort()'
