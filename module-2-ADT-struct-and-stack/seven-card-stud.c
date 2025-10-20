@@ -34,6 +34,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define DECK 52  // 52 cards in a deck of cards for blackjack/poker
 
@@ -93,6 +94,7 @@ typedef struct card {
 } card;
 
 // function signatures
+void deal_seven(card deck[DECK]);
 void fill_deck(card deck[DECK]);
 void print_deck(card deck[DECK]);
 void shuffle(card deck[DECK]);
@@ -116,6 +118,7 @@ int main(void) {
 
     card new_deck[DECK];  // declare empty array of 'struct card'
     fill_deck(new_deck);  // pass new_deck to make_deck() to populate it
+    srand((unsigned)time(NULL));  // seed RNG before calling 'rand()'
     shuffle(new_deck);
     print_deck(new_deck);
 
@@ -168,7 +171,8 @@ void print_deck(card deck[DECK]) {
 
 void shuffle(card deck[DECK]) {
     /* Use Fisher-Yates Durstenfeld variation shuffle algorithm introduced
-     * in Donald Knuth's 'Art of Programming' textbook
+     * in Donald Knuth's 'Art of Programming' textbook; O(n) time
+     * complexity
      * https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
      */
     int minN = 0;
@@ -181,6 +185,7 @@ void shuffle(card deck[DECK]) {
     }
 }
 
+// swap indices in array of 'card' structs
 void swap(card *a, card *b) {
     card temp = *a;
     *a = *b;
