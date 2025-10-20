@@ -90,6 +90,9 @@ typedef struct card {
     suit c_suit;
 } card;
 
+// function signatures
+card make_deck(void);
+
 int main(void) {
     // array of 'stats' structs
     stats scs_poker_hands[HAND_COUNT] = {
@@ -106,10 +109,40 @@ int main(void) {
         [ace_high_orless] = {ace_high_orless, 23294460, 0.17411920}
     };
 
-    // initialize array of struct 'card'
+    // create new deck of 52 cards (array of struct card)
+    card new_deck[DECK] = make_deck();  // invalid initializer
+    // the above is invalid b/c you try to initialize the array
+    // card new_deck[DECK] to A SINGLE CARD.
+
+    const char *suit_names[] = {"Clubs", "Diamonds", "Hearts", "Spades"};
+    const char *pip_names[] = {
+        "Invalid", "Ace", "Two", "Three", "Four", "Five", "Six", "Seven",
+        "Eight", "Nine", "Ten", "Jack", "Queen", "King"
+    };
+    printf("--- Initialized Deck of Cards ---\n");
+    for (int i = 0; i < DECK; i++) {
+        printf("Card %2d: %-5s of %s\n", i,
+               pip_names[new_deck[i].pips],
+               suit_names[new_deck[i].c_suit]);
+    }
+
+    printf("--- Four of a Kind ---\n");
+    printf("Combinations: %d\t",
+           scs_poker_hands[four_ofa_kind].combinations);
+    // specify 8 decimal places of precision (default is 6)
+    printf("Probability: %.08f\n",
+           scs_poker_hands[four_ofa_kind].probability);
+
+    return 0;
+}
+
+card make_deck(void) {
     card deck_of_cards[DECK];
 
-    int i = 0;  // index for 'deck_of_cards[DECK]'
+    // populate 52 cards, 4 suits w/ 13 cards each
+    // 1 to 13
+
+    int i = 0; // loop index 0
 
     // Outer loop: iterate through all suits from club: 0 to spade: 3
     for (suit s = club; s < SUIT_COUNT; s++) {
@@ -121,27 +154,8 @@ int main(void) {
             i++;
         }
     }
-
-    const char *suit_names[] = {"Clubs", "Diamonds", "Hearts", "Spades"};
-    const char *pip_names[] = {
-        "Invalid", "Ace", "Two", "Three", "Four", "Five", "Six", "Seven",
-        "Eight", "Nine", "Ten", "Jack", "Queen", "King"
-    };
-    printf("--- Initialized Deck of Cards ---\n");
-    for (i = 0; i < DECK; i++) {
-        printf("Card %2d: %-5s of %s\n", i,
-               pip_names[deck_of_cards[i].pips],
-               suit_names[deck_of_cards[i].c_suit]);
-    }
-
-    printf("--- Four of a Kind ---\n");
-    printf("Combinations: %d\t",
-           scs_poker_hands[four_ofa_kind].combinations);
-    // specify 8 decimal places of precision (default is 6)
-    printf("Probability: %.08f\n",
-           scs_poker_hands[four_ofa_kind].probability);
-
-    return 0;
+    // this is wrong b/c it still only returns 'one card'!
+    return deck_of_cards[DECK];
 }
 
 // TODO 0: add deck shuffling function: swap indices within the array of
