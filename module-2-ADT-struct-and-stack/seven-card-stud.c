@@ -33,6 +33,8 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
+
 #define DECK 52  // 52 cards in a deck of cards for blackjack/poker
 
 enum hand_name {
@@ -91,7 +93,10 @@ typedef struct card {
 } card;
 
 // function signatures
-card make_deck(void);
+void fill_deck(card deck[DECK]);
+void print_deck(card deck[DECK]);
+void shuffle(card deck[DECK]);
+void swap(card *a, card *b);
 
 int main(void) {
     // array of 'stats' structs
@@ -109,22 +114,10 @@ int main(void) {
         [ace_high_orless] = {ace_high_orless, 23294460, 0.17411920}
     };
 
-    // create new deck of 52 cards (array of struct card)
-    card new_deck[DECK] = make_deck();  // invalid initializer
-    // the above is invalid b/c you try to initialize the array
-    // card new_deck[DECK] to A SINGLE CARD.
-
-    const char *suit_names[] = {"Clubs", "Diamonds", "Hearts", "Spades"};
-    const char *pip_names[] = {
-        "Invalid", "Ace", "Two", "Three", "Four", "Five", "Six", "Seven",
-        "Eight", "Nine", "Ten", "Jack", "Queen", "King"
-    };
-    printf("--- Initialized Deck of Cards ---\n");
-    for (int i = 0; i < DECK; i++) {
-        printf("Card %2d: %-5s of %s\n", i,
-               pip_names[new_deck[i].pips],
-               suit_names[new_deck[i].c_suit]);
-    }
+    card new_deck[DECK];  // declare empty array of 'struct card'
+    fill_deck(new_deck);  // pass new_deck to make_deck() to populate it
+    shuffle(new_deck);
+    print_deck(new_deck);
 
     printf("--- Four of a Kind ---\n");
     printf("Combinations: %d\t",
@@ -136,11 +129,13 @@ int main(void) {
     return 0;
 }
 
-card make_deck(void) {
-    card deck_of_cards[DECK];
+void fill_deck(card deck[DECK]) {
+    /* populate 52 cards, 4 suits Clubs, Diamonds, Hearts, Spades w/ 13
+       cards each 1 to 13, in order.
 
-    // populate 52 cards, 4 suits w/ 13 cards each
-    // 1 to 13
+       NOTE: fill_deck() MUTATES the array of struct card 'deck[]'
+       passed into it, so no 'return' needed
+    */
 
     int i = 0; // loop index 0
 
@@ -149,21 +144,49 @@ card make_deck(void) {
         // Inner loop: iterate through all pipes from ace: 1 to king: 13
         for (cname p = ace; p < NAME_COUNT; p++) {
             // assign current suit and pip value to current card
-            deck_of_cards[i].c_suit = s;
-            deck_of_cards[i].pips = p;
+            deck[i].c_suit = s;
+            deck[i].pips = p;
             i++;
         }
     }
-    // this is wrong b/c it still only returns 'one card'!
-    return deck_of_cards[DECK];
 }
 
-// TODO 0: add deck shuffling function: swap indices within the array of
-// 'struct card' at random maybe 10 times? Then 7 cards will be dealt from
-// the 'top of the deck' starting from 'deck_of_cards[0]'.
+void print_deck(card deck[DECK]) {
+    const char *suit_names[] = {"Clubs", "Diamonds", "Hearts", "Spades"};
+    const char *pip_names[] = {
+        "Invalid", "Ace", "Two", "Three", "Four", "Five", "Six", "Seven",
+        "Eight", "Nine", "Ten", "Jack", "Queen", "King"
+    };
+    printf("--- Printing Deck of Cards ---\n");
+    for (int i = 0; i < DECK; i++) {
+        printf("Card %2d: %-5s of %s\n", i,
+               pip_names[deck[i].pips],
+               suit_names[deck[i].c_suit]);
+    }
+    printf("\n");
+}
 
-// TODO 1: Move deck initialization and population to separate function
-// return 'array of struct card'
+void shuffle(card deck[DECK]) {
+    /* Use Fisher-Yates Durstenfeld variation shuffle algorithm introduced
+     * in Donald Knuth's 'Art of Programming' textbook
+     * https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
+     */
+    int minN = 0;
+    for (int i = DECK - 1; i > 0; i--) {
+        int maxN = i;
+        // generate random 'j' s.t. 0 <= j <= i
+        int j = (rand() % (maxN - minN + 1)) + minN;
+        // swap values at deck[] indices 'j' and 'i'
+        swap(&deck[j], &deck[i]);
+    }
+}
+
+void swap(card *a, card *b) {
+    card temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
 
 /* TODO 2: implement 7-card poker hand analysis (pips only)
  * I first thought about sorting the pip values using 'qsort()'
