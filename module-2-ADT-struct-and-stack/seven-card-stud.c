@@ -36,6 +36,12 @@
  *
  * Check against probabilities found in a standard table for Seven
  * Card Stud Poker https://wizardofodds.com/games/poker/
+ *
+ * NOTE: although I was able to run 100,000 hands using memory
+ * allocated on the stack, to test 1,000,000 hands, stack memory was
+ * not large enough, so I had to manually allocate arrays of struct
+ * 'card' in the heap instead.
+
 */
 
 #include <stdio.h>
@@ -43,7 +49,7 @@
 #include <time.h>
 
 #define DECK 52  // 52 cards in a deck of cards for blackjack/poker
-#define MC_MAX 100000  // Monte Carlo Analysis max iterations
+#define MC_MAX 1000000  // Monte Carlo Analysis max iterations
 
 // global immutable character array
 const char *hand_names[] = {
@@ -110,11 +116,11 @@ typedef struct card {
 } card;
 
 // function signatures
-void classify_hand(card hand[7], stats hands[MC_MAX]);
+void classify_hand(card hand[7], stats *hand_results);
 void deal_seven(card deck[DECK], card hand[7]);
 void fill_deck(card deck[DECK]);
 void print_cards(card cards[], int size);  // useful for debugging
-void print_mc_analysis(stats hands[MC_MAX]);
+void print_mc_analysis(stats *hands);
 void print_ptable(stats ptable[HAND_COUNT]);
 void shuffle(card deck[DECK]);
 void swap(card *a, card *b);
@@ -132,7 +138,15 @@ int main(void) {
         [no_pair] = {no_pair, 0, 0.17411920}
     };
 
-    stats hand_results[MC_MAX] = {0};  // array of struct 'stats'
+    // The calloc() function allocates memory for an array of 'nmemb'
+    // elements of 'size' bytes each and returns a pointer to the
+    // allocated memory. The memory is set to zero
+    stats *hand_results = calloc(MC_MAX, sizeof(stats));
+    if (hand_results == NULL) {
+        fprintf(stderr, "Error: Memory allocation failed for hand_results.\n");
+        return 1; // Indicate error
+    }
+
     srand((unsigned)time(NULL));  // seed RNG before calling 'rand()'
 
     // deal multiple 7-card hands for Monte Carlo Analysis
@@ -156,6 +170,27 @@ int main(void) {
     print_mc_analysis(hand_results);
     print_ptable(scs_poker_hands);
 
+    printf("--- Four of a Kind from P-chart ---\n");
+    printf("Hand Name: ");
+    // specify 8 decimal places of precision (default is 6)
+    printf("Probability: %.08f\n",
+           scs_poker_hands[four_ofa_kind].probability);
+
+    /* debug printf() for pip frequency array
+    printf("--- Pip Frequency Counts ---\n");
+    int tot_count = 0;
+    for (int k = 1; k < 14; k++) {
+        printf("%s count: %d\n", pip_names[k], pip_counts[k]);
+        tot_count += pip_counts[k];
+    }
+    printf("Total number of cards: %d\n\n", tot_count);
+    */
+
+    /* debug printf() statements
+    print_cards(new_deck, DECK);
+     */
+
+    free(hand_results); // free the allocated memory
     return 0;
 }
 
@@ -191,20 +226,24 @@ void print_cards(card cards[], int size) {
     printf("\n");
 }
 
-void print_mc_analysis(stats hand_results[MC_MAX]) {
+void print_mc_analysis(stats *hands) {
     printf("--- Monte Carlo Analysis of %d Hands ---\n", MC_MAX);
+    int tot_count = 0;
     for (hand i = four_ofa_kind; i < HAND_COUNT; i++) {
-        printf("%s\t count: %d\t\t probability: %.08f\n",
-               hand_names[i], hand_results[i].count,
-               hand_results[i].probability);
+        printf("%s\t count: %d\t probability: %.08f\n",
+               hand_names[i], hands[i].count,
+               hands[i].probability);
+        tot_count += hands[i].count;
     }
     printf("\n");
+    printf("---------------------------------------------\n");
+    printf("Total count: %d\t\t probability: 1.00\n\n", tot_count);
 }
 
 void print_ptable(stats ptable[HAND_COUNT]) {
     printf("--- Reference Table of 7-card stud Poker Probabilities ---\n");
     for (hand i = four_ofa_kind; i < HAND_COUNT; i++) {
-        printf("%s\t probability: %.08f\n", hand_names[i],
+        printf("%s\t\t probability: %.08f\n", hand_names[i],
                ptable[i].probability);
     }
 }
@@ -243,7 +282,8 @@ void deal_seven(card deck[DECK], card hand[7]) {
     }
 }
 
-void classify_hand(card hand[7], stats hand_results[MC_MAX]) {
+void classify_hand(card hand[7], stats *hand_results) {
+
     /* Int array 'hand_results' is a frequency array of poker hand types
      * like 'Four of a Kind', 'One Pair', etc. Time complexity O(n) where
      * 'n' is size of int array. No 'return' as int array 'hand_results' is
