@@ -25,6 +25,12 @@
  *   + 'three of a kind' and 'two pair'
  * - four of a kind (4 cards have the same pip)
  *
+ * NOTE: we will ignore suits for this homework, so hands like
+ * 'royal flush', 'straight flush', and 'flush' (these require cards
+ * to all have the same suit) will not be counted. Also, 'straight'
+ * (a hand containing consecutive pip values like '2, 3, 4, 5, 6, 7')
+ * will also be ignored for this homework.
+ *
  * This is a Monte Carlo method to get an approximation to these
  * probabilities.  Use at least 1 million randomly generated hands.
  *
@@ -39,16 +45,16 @@
 #define DECK 52  // 52 cards in a deck of cards for blackjack/poker
 
 enum hand_name {
-    royal_flush,
-    straight_flush,
+    royal_flush,  // omitted
+    straight_flush,  // omitted
     four_ofa_kind,
     full_house,
-    flush,
-    straight,
+    flush,  // omitted
+    straight,  // omitted
     three_ofa_kind,
     two_pair,
     one_pair,
-    ace_high_orless,
+    ace_high_orless,  // no pair
     HAND_COUNT
 };
 typedef enum hand_name hand;
@@ -94,16 +100,17 @@ typedef struct card {
 } card;
 
 // function signatures
+void analyze_hist(int histogram[14]);
+void classify_hand();
+void count_pips(card hand[7], int histogram[14]);
 void deal_seven(card deck[DECK], card hand[7]);
 void fill_deck(card deck[DECK]);
-void count_pips(card hand[7], int histogram[14]);
-void analyze_hist(int histogram[14]);
 void print_cards(card cards[], int size);
 void shuffle(card deck[DECK]);
 void swap(card *a, card *b);
 
 int main(void) {
-    // array of 'stats' structs
+    // array of struct 'stats'
     stats scs_poker_hands[HAND_COUNT] = {
         // designated initializer syntax
         [royal_flush] = {royal_flush, 4324, 0.00003232},
@@ -236,18 +243,10 @@ void count_pips(card hand[7], int histogram[14]) {
      * 'histogram' is directly mutated!
      *
      * Int array 'histogram' indices 1 to 13 represent 1: Ace to
-     * 13: King
+     * 13: King. Index '0' is unused
      */
     for (int i = 0; i < 7; i++) {
         histogram[hand[i].pips]++;
     }
 }
 
-/*
- * After this loop, your pips_count array will look like:
- * [0, 0, 1, 0, 0, 3, 0, 0, 0, 0, 2, 0, 0, 1]
- *
- * pip_counts[2] = 1, pip_counts[5] = 3, pip_counts[10] = 2,
- * pip_counts[13] = 1
- * Now all you have to do is iterate from 1 to 13 and check the counts
-*/
