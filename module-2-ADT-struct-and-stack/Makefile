@@ -6,22 +6,16 @@ CFLAGS = -g -fsanitize=address -Wall -O3 -std=c23
 BINDIR = bin
 VALFLAGS = --tool=memcheck --leak-check=full
 
-C_RELATIVE := $(patsubst ./%,%,$(C_SOURCES))
-C_BINARIES := $(addprefix $(BINDIR)/,$(C_RELATIVE:.c=))
 C_SOURCES := $(shell find . -type f -name '*.c' -not -path './$(BINDIR)/*')
 C_SOURCES := $(sort $(C_SOURCES))
-ALL_TARGETS := $(C_BINARIES)
+ALL_TARGETS := $(C_SOURCES)
 
-.PHONY: all all-auto check-syntax clean cleanall java mem test
+.PHONY: all check-syntax clean cleanall mem test
 
 all: $(ALL_TARGETS)
 
 $(BINDIR):
 	mkdir -p $(BINDIR)
-
-$(BINDIR)/%: %.c | $(BINDIR)
-	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -o $@ $<
 
 check-syntax:
 	@if [ -n "$(C_SOURCES)" ]; then \
@@ -30,9 +24,9 @@ check-syntax:
 		echo "No C sources found for syntax check."; \
 	fi
 
-mem: $(C_BINARIES)
-	@if [ -n "$(C_BINARIES)" ]; then \
-		for file in $(C_BINARIES); do \
+mem: $(BINDIR)
+	@if [ -n "$(BINDIR)" ]; then \
+		for file in $(BINDIR); do \
 			echo "Running valgrind on $$file..."; \
 			valgrind $(VALFLAGS) "./$$file" || true; \
 		done; \
@@ -41,7 +35,7 @@ mem: $(C_BINARIES)
 	fi
 
 # Test target (placeholder - add your test commands)
-test: $(C_BINARIES)
+test: all
 	@if [ -n "$(C_SOURCES)" ]; then \
 		for file in $(C_SOURCES); do \
 			echo "Running splint on $$file..."; \
@@ -52,8 +46,8 @@ test: $(C_BINARIES)
 	fi
 
 clean:
-	@if [ -n "$(C_BINARIES)" ]; then \
-		rm -f $(C_BINARIES); \
+	@if [ -n "$(BINDIR)" ]; then \
+		rm -f $(BINDIR); \
 	fi
 
 cleanall:
