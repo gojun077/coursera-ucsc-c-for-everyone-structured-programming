@@ -6,16 +6,18 @@ CFLAGS = -g -fsanitize=address -Wall -O3 -std=c23
 BINDIR = bin
 VALFLAGS = --tool=memcheck --leak-check=full
 
-C_SOURCES := $(shell find . -type f -name '*.c' -not -path './$(BINDIR)/*')
-C_SOURCES := $(sort $(C_SOURCES))
-ALL_TARGETS := $(C_SOURCES)
+C_SOURCES := $(sort $(wildcard *.c))
+BINARIES := $(patsubst %.c,$(BINDIR)/%,$(C_SOURCES))
 
 .PHONY: all check-syntax clean cleanall mem test
 
-all: $(ALL_TARGETS)
+all: $(BINARIES)
 
 $(BINDIR):
 	mkdir -p $(BINDIR)
+
+$(BINDIR)/%: %.c | $(BINDIR)
+	$(CC) $(CFLAGS) -o $@ $<
 
 check-syntax:
 	@if [ -n "$(C_SOURCES)" ]; then \
@@ -24,9 +26,9 @@ check-syntax:
 		echo "No C sources found for syntax check."; \
 	fi
 
-mem: $(BINDIR)
-	@if [ -n "$(BINDIR)" ]; then \
-		for file in $(BINDIR); do \
+mem: $(BINARIES)
+	@if [ -n "$(BINARIES)" ]; then \
+		for file in $(BINARIES); do \
 			echo "Running valgrind on $$file..."; \
 			valgrind $(VALFLAGS) "./$$file" || true; \
 		done; \
@@ -46,8 +48,8 @@ test: all
 	fi
 
 clean:
-	@if [ -n "$(BINDIR)" ]; then \
-		rm -f $(BINDIR); \
+	@if [ -n "$(BINARIES)" ]; then \
+		rm -f $(BINARIES); \
 	fi
 
 cleanall:
