@@ -215,9 +215,9 @@ void print_mc_analysis(stats *hands) {
                hands[i].probability);
         tot_count += hands[i].count;
     }
-    printf("\n");
     printf("---------------------------------------------\n");
-    printf("Total count: %d\t\t probability: 1.00\n\n", tot_count);
+    printf("Total count: %d\t\t probability: 1.00\n", tot_count);
+    printf("*NOTE*: 'Pair', 'No Pair' count will be inflated b/c we do not consider straights or flushes!\n\n");
 }
 
 void print_ptable(stats ptable[HAND_COUNT]) {
