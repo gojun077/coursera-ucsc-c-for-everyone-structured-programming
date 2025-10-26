@@ -1,7 +1,7 @@
 /*
  * seven-card-stud.c
  * Created on: Fri 17 Oct 2025
- * Last Updated: Fri 17 Oct 2025
+ * Last Updated: Sun 26 Oct 2025
  * gopeterjun@naver.com
  * C for Everyone: Structured Programming
  * Module 2 Honors Assignment
@@ -94,9 +94,11 @@ typedef struct card {
 } card;
 
 // function signatures
-void deal_seven(card deck[DECK]);
+void deal_seven(card deck[DECK], card hand[7]);
 void fill_deck(card deck[DECK]);
-void print_deck(card deck[DECK]);
+void count_pips(card hand[7], int histogram[14]);
+void analyze_hist(int histogram[14]);
+void print_cards(card cards[], int size);
 void shuffle(card deck[DECK]);
 void swap(card *a, card *b);
 
@@ -120,7 +122,14 @@ int main(void) {
     fill_deck(new_deck);  // pass new_deck to make_deck() to populate it
     srand((unsigned)time(NULL));  // seed RNG before calling 'rand()'
     shuffle(new_deck);
-    print_deck(new_deck);
+
+    card hand[7];
+    deal_seven(new_deck, hand);
+    print_cards(hand, 7);
+
+    /* debug printf() statements
+    print_cards(new_deck, DECK);
+     */
 
     printf("--- Four of a Kind ---\n");
     printf("Combinations: %d\t",
@@ -140,11 +149,11 @@ void fill_deck(card deck[DECK]) {
        passed into it, so no 'return' needed
     */
 
-    int i = 0; // loop index 0
+    int i = 0; // loop start index 0; 'i' will go up to 51
 
     // Outer loop: iterate through all suits from club: 0 to spade: 3
     for (suit s = club; s < SUIT_COUNT; s++) {
-        // Inner loop: iterate through all pipes from ace: 1 to king: 13
+        // Inner loop: iterate through all pips from ace: 1 to king: 13
         for (cname p = ace; p < NAME_COUNT; p++) {
             // assign current suit and pip value to current card
             deck[i].c_suit = s;
@@ -154,25 +163,25 @@ void fill_deck(card deck[DECK]) {
     }
 }
 
-void print_deck(card deck[DECK]) {
+void print_cards(card cards[], int size) {
     const char *suit_names[] = {"Clubs", "Diamonds", "Hearts", "Spades"};
     const char *pip_names[] = {
         "Invalid", "Ace", "Two", "Three", "Four", "Five", "Six", "Seven",
         "Eight", "Nine", "Ten", "Jack", "Queen", "King"
     };
-    printf("--- Printing Deck of Cards ---\n");
-    for (int i = 0; i < DECK; i++) {
-        printf("Card %2d: %-5s of %s\n", i,
-               pip_names[deck[i].pips],
-               suit_names[deck[i].c_suit]);
+    printf("--- Printing Cards ---\n");
+    for (int i = 0; i < size; i++) {
+        printf("Card %2d: %-5s of %s\n", i + 1,
+               pip_names[cards[i].pips],
+               suit_names[cards[i].c_suit]);
     }
     printf("\n");
 }
 
 void shuffle(card deck[DECK]) {
-    /* Use Fisher-Yates Durstenfeld variation shuffle algorithm introduced
-     * in Donald Knuth's 'Art of Programming' textbook; O(n) time
-     * complexity
+    /* Use Fisher-Yates shuffle algorithm (Durstenfeld variation)
+     * introduced in Donald Knuth's 'Art of Programming' textbook; O(n)
+     * time complexity
      * https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
      */
     int minN = 0;
@@ -190,6 +199,17 @@ void swap(card *a, card *b) {
     card temp = *a;
     *a = *b;
     *b = temp;
+}
+
+void deal_seven(card deck[DECK], card hand[7]) {
+    /*
+     * This function deals a 7-card hand from the top of the deck
+     * into the 'hand' array provided by the caller. This function has
+     * no 'return' b/c it mutates 'card hand[7] directly!
+    */
+    for (int i = 0; i < 7; i++) {
+        hand[i] = deck[i];
+    }
 }
 
 
