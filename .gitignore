@@ -8,3 +8,5 @@ missfont.log
 *.o
 # ignore output binaries
 *.out
+# ignore Valgrind coredump files
+vgcore.*
