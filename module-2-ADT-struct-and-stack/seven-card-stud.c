@@ -170,26 +170,6 @@ int main(void) {
     print_mc_analysis(hand_results);
     print_ptable(scs_poker_hands);
 
-    printf("--- Four of a Kind from P-chart ---\n");
-    printf("Hand Name: ");
-    // specify 8 decimal places of precision (default is 6)
-    printf("Probability: %.08f\n",
-           scs_poker_hands[four_ofa_kind].probability);
-
-    /* debug printf() for pip frequency array
-    printf("--- Pip Frequency Counts ---\n");
-    int tot_count = 0;
-    for (int k = 1; k < 14; k++) {
-        printf("%s count: %d\n", pip_names[k], pip_counts[k]);
-        tot_count += pip_counts[k];
-    }
-    printf("Total number of cards: %d\n\n", tot_count);
-    */
-
-    /* debug printf() statements
-    print_cards(new_deck, DECK);
-     */
-
     free(hand_results); // free the allocated memory
     return 0;
 }
