@@ -43,18 +43,28 @@
 #include <time.h>
 
 #define DECK 52  // 52 cards in a deck of cards for blackjack/poker
+#define MC_MAX 100000  // Monte Carlo Analysis max iterations
+
+// global immutable character array
+const char *hand_names[] = {
+    "Four of a Kind", "Full House",
+    "Three of a Kind", "Two Pair", "One Pair", "No Pair"
+};
+// global immutable character array
+const char *suit_names[] = {"Clubs", "Diamonds", "Hearts", "Spades"};
+// global immutable character array
+const char *pip_names[] = {
+    "Invalid", "Ace", "Two", "Three", "Four", "Five", "Six", "Seven",
+    "Eight", "Nine", "Ten", "Jack", "Queen", "King"
+};
 
 enum hand_name {
-    royal_flush,  // omitted
-    straight_flush,  // omitted
     four_ofa_kind,
     full_house,
-    flush,  // omitted
-    straight,  // omitted
     three_ofa_kind,
     two_pair,
     one_pair,
-    ace_high_orless,  // no pair
+    no_pair,
     HAND_COUNT
 };
 typedef enum hand_name hand;
@@ -62,7 +72,7 @@ typedef enum hand_name hand;
 // stats for a single hand
 typedef struct hand_stats {
     hand name;
-    int combinations;
+    unsigned int count;
     double probability;
 } stats;
 
@@ -100,12 +110,12 @@ typedef struct card {
 } card;
 
 // function signatures
-void analyze_hist(int histogram[14]);
-void classify_hand();
-void count_pips(card hand[7], int histogram[14]);
+void classify_hand(card hand[7], stats hands[MC_MAX]);
 void deal_seven(card deck[DECK], card hand[7]);
 void fill_deck(card deck[DECK]);
-void print_cards(card cards[], int size);
+void print_cards(card cards[], int size);  // useful for debugging
+void print_mc_analysis(stats hands[MC_MAX]);
+void print_ptable(stats ptable[HAND_COUNT]);
 void shuffle(card deck[DECK]);
 void swap(card *a, card *b);
 
@@ -113,55 +123,38 @@ int main(void) {
     // array of struct 'stats'
     stats scs_poker_hands[HAND_COUNT] = {
         // designated initializer syntax
-        [royal_flush] = {royal_flush, 4324, 0.00003232},
-        [straight_flush] = {straight_flush, 37260, 0.00027851},
-        [four_ofa_kind]   = {four_ofa_kind, 224848, 0.00168067},
-        [full_house]      = {full_house, 3473184, 0.02596102},
-        [flush]           = {flush, 4047644, 0.03025494},
-        [straight]        = {straight, 6180020, 0.04619382},
-        [three_ofa_kind]  = {three_ofa_kind, 6461620, 0.04829870},
-        [two_pair]        = {two_pair, 31433400, 0.23495536},
-        [one_pair]        = {one_pair, 58627800, 0.43822546},
-        [ace_high_orless] = {ace_high_orless, 23294460, 0.17411920}
+        // data from https://wizardofodds.com/games/poker/
+        [four_ofa_kind]   = {four_ofa_kind, 0, 0.00168067},
+        [full_house]      = {full_house, 0, 0.02596102},
+        [three_ofa_kind]  = {three_ofa_kind, 0, 0.04829870},
+        [two_pair]        = {two_pair, 0, 0.23495536},
+        [one_pair]        = {one_pair, 0, 0.43822546},
+        [no_pair] = {no_pair, 0, 0.17411920}
     };
 
-    int pip_counts[14] = {0};  // initialize integer array to 0's
+    stats hand_results[MC_MAX] = {0};  // array of struct 'stats'
     srand((unsigned)time(NULL));  // seed RNG before calling 'rand()'
 
-    for (int j = 0; j < 10; j++) {
-        printf("Hand No. %d\n:", j+1);
+    // deal multiple 7-card hands for Monte Carlo Analysis
+    for (int j = 0; j < MC_MAX; j++) {
+        //printf("Hand No. %d\n:", j+1);
         card new_deck[DECK] = {0};  // array of 'struct card', 52 card deck
         card hand[7];  // array of struct 'card' for 7-card hand
-        fill_deck(new_deck);  // pass new_deck to make_deck() to populate it
-        shuffle(new_deck);
-
-        deal_seven(new_deck, hand);
-        count_pips(hand, pip_counts);
-        print_cards(hand, 7);
+        fill_deck(new_deck);  // pass new_deck to fill_deck() to populate it
+        shuffle(new_deck);  // shuffle 'new_deck'
+        deal_seven(new_deck, hand);  // deal 7-card hand from top of deck
+        classify_hand(hand, hand_results);  // update 'hand_results'
+        //print_cards(hand, 7);
     }
 
-    printf("--- Pip Frequency Counts ---\n");
-    const char *pip_names[] = {
-    "Invalid", "Ace", "Two", "Three", "Four", "Five", "Six", "Seven",
-    "Eight", "Nine", "Ten", "Jack", "Queen", "King"
-    };
-    int tot_count = 0;
-    for (int k = 1; k < 14; k++) {
-        printf("%s count: %d\n", pip_names[k], pip_counts[k]);
-        tot_count += pip_counts[k];
+    // Add probabilities to array of struct 'stats' aka 'hand_results'
+    for (hand i = four_ofa_kind; i < HAND_COUNT; i++) {
+        hand_results[i].probability = (
+            hand_results[i].count / (double)MC_MAX); // force conversion
     }
-    printf("Total number of cards: %d\n\n", tot_count);
 
-    /* debug printf() statements
-    print_cards(new_deck, DECK);
-     */
-
-    printf("--- Four of a Kind ---\n");
-    printf("Combinations: %d\t",
-           scs_poker_hands[four_ofa_kind].combinations);
-    // specify 8 decimal places of precision (default is 6)
-    printf("Probability: %.08f\n",
-           scs_poker_hands[four_ofa_kind].probability);
+    print_mc_analysis(hand_results);
+    print_ptable(scs_poker_hands);
 
     return 0;
 }
@@ -189,11 +182,6 @@ void fill_deck(card deck[DECK]) {
 }
 
 void print_cards(card cards[], int size) {
-    const char *suit_names[] = {"Clubs", "Diamonds", "Hearts", "Spades"};
-    const char *pip_names[] = {
-        "Invalid", "Ace", "Two", "Three", "Four", "Five", "Six", "Seven",
-        "Eight", "Nine", "Ten", "Jack", "Queen", "King"
-    };
     printf("--- Printing Cards ---\n");
     for (int i = 0; i < size; i++) {
         printf("Card %2d: %-5s of %s\n", i + 1,
@@ -201,6 +189,24 @@ void print_cards(card cards[], int size) {
                suit_names[cards[i].c_suit]);
     }
     printf("\n");
+}
+
+void print_mc_analysis(stats hand_results[MC_MAX]) {
+    printf("--- Monte Carlo Analysis of %d Hands ---\n", MC_MAX);
+    for (hand i = four_ofa_kind; i < HAND_COUNT; i++) {
+        printf("%s\t count: %d\t\t probability: %.08f\n",
+               hand_names[i], hand_results[i].count,
+               hand_results[i].probability);
+    }
+    printf("\n");
+}
+
+void print_ptable(stats ptable[HAND_COUNT]) {
+    printf("--- Reference Table of 7-card stud Poker Probabilities ---\n");
+    for (hand i = four_ofa_kind; i < HAND_COUNT; i++) {
+        printf("%s\t probability: %.08f\n", hand_names[i],
+               ptable[i].probability);
+    }
 }
 
 void shuffle(card deck[DECK]) {
@@ -237,16 +243,59 @@ void deal_seven(card deck[DECK], card hand[7]) {
     }
 }
 
-void count_pips(card hand[7], int histogram[14]) {
-    /* Int array 'histogram' is a pip frequency array. Time complexity
-     * O(n) where 'n' is size of int array. No 'return' as int array
-     * 'histogram' is directly mutated!
+void classify_hand(card hand[7], stats hand_results[MC_MAX]) {
+    /* Int array 'hand_results' is a frequency array of poker hand types
+     * like 'Four of a Kind', 'One Pair', etc. Time complexity O(n) where
+     * 'n' is size of int array. No 'return' as int array 'hand_results' is
+     * directly mutated!
      *
-     * Int array 'histogram' indices 1 to 13 represent 1: Ace to
-     * 13: King. Index '0' is unused
+     * Step One: Initialize int array 'histogram' where indices 1 to 13
+     * represent 1: Ace to 13: King. Index '0' is unused.
+     *
+     * Step Two: Iterate over array of card struct 'hand[7]' and record
+     * the frequency of each card pip from 'hand' in 'histogram' (freq
+     * array).
+     *
+     * Step Three: Classify the hand based on pip frequency counts.
+     * - 'quads': 4 cards each with the same pip value
+     * - 'trips': 3 cards each with the same pip value
+     * - 'pairs': 2 cards each with the same pip value
+     * NOTE: it is important to to check from the BEST hand down to the
+     * WORST!
      */
+    unsigned short pairs = 0;
+    unsigned short trips = 0;
+    unsigned short quads = 0;
+    int histogram[14] = {0};
     for (int i = 0; i < 7; i++) {
         histogram[hand[i].pips]++;
     }
-}
 
+    // count quads, trips, pairs
+    for (int j = 1; j < 14; j++) {
+        if (histogram[j] == 4) {
+            quads++;
+        } else if (histogram[j] == 3) {
+            trips++;
+        } else if (histogram[j] == 2) {
+            pairs++;
+        }
+    }
+
+    // classify hand
+    if (quads > 0) {
+        hand_results[four_ofa_kind].count++;
+    } else if ((trips > 0 && pairs > 0) || trips > 1) {
+        // the above condition covers "3 of a kind + one pair",
+        // TWO "3 of a kinds", and "3 of a kind and two pairs"
+        hand_results[full_house].count++;
+    } else if (trips > 0) {
+        hand_results[three_ofa_kind].count++;
+    } else if (pairs >= 2) {
+        hand_results[two_pair].count++;
+    } else if (pairs == 1) {
+        hand_results[one_pair].count++;
+    } else {
+        hand_results[no_pair].count++;
+    }
+}
