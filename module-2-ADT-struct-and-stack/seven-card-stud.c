@@ -118,14 +118,32 @@ int main(void) {
         [ace_high_orless] = {ace_high_orless, 23294460, 0.17411920}
     };
 
-    card new_deck[DECK];  // declare empty array of 'struct card'
-    fill_deck(new_deck);  // pass new_deck to make_deck() to populate it
+    int pip_counts[14] = {0};  // initialize integer array to 0's
     srand((unsigned)time(NULL));  // seed RNG before calling 'rand()'
-    shuffle(new_deck);
 
-    card hand[7];
-    deal_seven(new_deck, hand);
-    print_cards(hand, 7);
+    for (int j = 0; j < 10; j++) {
+        printf("Hand No. %d\n:", j+1);
+        card new_deck[DECK] = {0};  // array of 'struct card', 52 card deck
+        card hand[7];  // array of struct 'card' for 7-card hand
+        fill_deck(new_deck);  // pass new_deck to make_deck() to populate it
+        shuffle(new_deck);
+
+        deal_seven(new_deck, hand);
+        count_pips(hand, pip_counts);
+        print_cards(hand, 7);
+    }
+
+    printf("--- Pip Frequency Counts ---\n");
+    const char *pip_names[] = {
+    "Invalid", "Ace", "Two", "Three", "Four", "Five", "Six", "Seven",
+    "Eight", "Nine", "Ten", "Jack", "Queen", "King"
+    };
+    int tot_count = 0;
+    for (int k = 1; k < 14; k++) {
+        printf("%s count: %d\n", pip_names[k], pip_counts[k]);
+        tot_count += pip_counts[k];
+    }
+    printf("Total number of cards: %d\n\n", tot_count);
 
     /* debug printf() statements
     print_cards(new_deck, DECK);
@@ -212,30 +230,20 @@ void deal_seven(card deck[DECK], card hand[7]) {
     }
 }
 
+void count_pips(card hand[7], int histogram[14]) {
+    /* Int array 'histogram' is a pip frequency array. Time complexity
+     * O(n) where 'n' is size of int array. No 'return' as int array
+     * 'histogram' is directly mutated!
+     *
+     * Int array 'histogram' indices 1 to 13 represent 1: Ace to
+     * 13: King
+     */
+    for (int i = 0; i < 7; i++) {
+        histogram[hand[i].pips]++;
+    }
+}
 
-/* TODO 2: implement 7-card poker hand analysis (pips only)
- * I first thought about sorting the pip values using 'qsort()'
- * from <stdlib.h>, but this operation is O(n log n) time complexity.
- * For small arrays of just 7 values, this will happen almost
- * instantaneously.
- *
- * But a better approach would be to use a 'frequency array', aka
- * HISTOGRAM, and just count the pip occurrences in a single pass. This has
- * time complexity O(n). For 7 values, you won't really be able to tell a
- * difference between O(n) and O(n log n), but the HISTOGRAM approach is
- * better because it can be implemented with less code. First create your
- * histogram:
- *
- * // indices 1 to 13 will store pip counts for Ace:1 to King: 13
- * int pip_counts[14] = {0};  // initialize empty array
- *
- * Now assuming your 7 card pips are [5, 10, 5, 13, 10, 5, 2]
- *
- * // 'deck_of_cards' is an array of struct card from main() above
- * for (int i = 0; i < 7; i++) {
- *     pip_counts[deck_of_cards[i].pips]++;
- * }
- *
+/*
  * After this loop, your pips_count array will look like:
  * [0, 0, 1, 0, 0, 3, 0, 0, 0, 0, 2, 0, 0, 1]
  *
