@@ -9,7 +9,7 @@
 * Summary
 
 - Created on: [2025-10-17 Fri]
-- Last Updated: [2025-10-17 Fri 11:48]
+- Last Updated: [2025-11-02 Sun 14:31]
 
 This repo contains my notes and homework for the UC San Diego course, [[https://www.coursera.org/learn/c-structured-programming/home/welcome][C for
 Everyone: Structured Programming]], the 2nd course in the introductory /C for
@@ -35,6 +35,7 @@ wrote *C by Dissection* (Kelley & Pohl, 2000 4ed) and *A Book on C* (Kelley
   - Module 2 Assignment (Peer graded)
     - using =struct=
   - Module 2 Honors Assignment (Peer graded)
+    + 7 card stud Monte Carlo simulator
 - Module 3: List ADT and Binary Tree ADT
   - Intro to the ADT list
   - List of one element
