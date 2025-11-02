@@ -23,9 +23,8 @@ void inorder(BTREE root) {
     // in-order tree traversal
     if (root != NULL) {
         inorder(root -> left);  // recur to the left
-        printf("%c", root -> d);
+        printf("%c ", root -> d);
         inorder(root -> right); // recur to the right
-        printf("%c", root -> d);
     }
 }
 
